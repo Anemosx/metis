@@ -15,11 +15,18 @@ fastapi = "^0.111.0"
 pydantic = "^2.7.4"
 requests = "^2.32.3"
 tqdm = "^4.66.4"
+black = "^24.4.2"
 
 [[tool.poetry.source]]
 name = "torch_cuda121"
 url = "https://download.pytorch.org/whl/cu121"
 priority = "explicit"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.2.2"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
 
 [build-system]
 requires = ["poetry-core"]

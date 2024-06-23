@@ -4,7 +4,7 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 from torch import nn, optim
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
@@ -71,6 +71,7 @@ def train_model(
     optimizer: optim.Optimizer,
     criterion: nn.Module,
     train_loader: DataLoader,
+    val_loader: DataLoader,
     epochs: int = 5,
     patience: int = 2,
     device: str | torch.device | None = None,
@@ -89,6 +90,8 @@ def train_model(
         The loss function to measure the differences between predicted and true labels.
     train_loader : DataLoader
         DataLoader for the training dataset.
+    val_loader : DataLoader
+        DataLoader for the validation dataset.
     epochs : int, optional
         Number of epochs to train the model (default is 5).
     patience : int, optional
@@ -114,12 +117,13 @@ def train_model(
             total=total_steps, desc="Training Progress", colour="white", leave=False
         )
 
-    best_loss = float("inf")
+    best_val_loss = float("inf")
     epochs_without_improvement = 0
 
     # training cycle
     for epoch in range(epochs):
-        loss = 0
+        model.train()
+        epoch_loss = 0
         correct = 0
         total = 0
 
@@ -154,9 +158,22 @@ def train_model(
                 )
                 progress_bar.update(1)
 
+        avg_epoch_loss = epoch_loss / len(train_loader)
+
         # check for early stopping
-        if loss.item() < best_loss:
-            best_loss = loss.item()
+        model.eval()
+        val_loss = 0
+        with torch.no_grad():
+            for images, labels in val_loader:
+                images, labels = images.to(device), labels.to(device)
+                outputs = model(images)
+                loss = criterion(outputs, labels)
+                val_loss += loss.item()
+
+        avg_val_loss = val_loss / len(val_loader)
+
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
             epochs_without_improvement = 0
         else:
             epochs_without_improvement += 1
@@ -167,7 +184,10 @@ def train_model(
 
         # write epoch loss to indicate some progress
         if not display_progress:
-            print(f"Epoch [{epoch + 1}/{epochs}], Loss: {loss.item():.4f}")
+            print(
+                f"Epoch [{epoch + 1}/{epochs}], Loss: {avg_epoch_loss:.4f}, "
+                f"Val Loss: {avg_val_loss:.4f}"
+            )
 
     if display_progress:
         progress_bar.close()
@@ -309,15 +329,19 @@ def run() -> None:
     )
 
     # train and test sets
-    train_set = torchvision.datasets.MNIST(
+    full_train_set = torchvision.datasets.MNIST(
         root=data_dir, train=True, download=True, transform=img_transform
     )
     test_set = torchvision.datasets.MNIST(
         root=data_dir, train=False, download=True, transform=img_transform
     )
 
-    # train and test loader
+    train_size = int(0.8 * len(full_train_set))
+    val_size = len(full_train_set) - train_size
+    train_set, val_set = random_split(full_train_set, [train_size, val_size])
+
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_set, batch_size=test_set.data.shape[0], shuffle=False)
 
     # initialize model
@@ -328,7 +352,9 @@ def run() -> None:
     criterion = nn.CrossEntropyLoss()
 
     # train the model
-    train_model(model, optimizer, criterion, train_loader, epochs, patience, device)
+    train_model(
+        model, optimizer, criterion, train_loader, val_loader, epochs, patience, device
+    )
 
     # save weights
     save_model(model)

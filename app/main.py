@@ -5,7 +5,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.routers import base_router, predict_router
+from app.routers import base_router, mnist_router
 from app.vision.mnist import init_vision_model
 
 
@@ -31,7 +31,7 @@ mnist_app: FastAPI = FastAPI(
 )
 mnist_app.mount("/static", StaticFiles(directory="static"), name="static")
 mnist_app.include_router(base_router)
-mnist_app.include_router(predict_router)
+mnist_app.include_router(mnist_router)
 
 
 async def init_model() -> None:

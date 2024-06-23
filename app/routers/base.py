@@ -10,7 +10,7 @@ with open(mnist_html_file_path, "r") as file:
     mnist_content = file.read()
 
 
-@router.get("/", response_class=HTMLResponse)
+@router.get("/mnist", response_class=HTMLResponse)
 async def read_root() -> HTMLResponse:
     """
     Serve the MNIST HTML page from the static directory.

@@ -1,9 +1,11 @@
+import io
 import os
 
+import numpy as np
 import torch
 from PIL.Image import Image
 from torch import nn
-from torchvision import transforms
+import torch.nn.functional as F
 
 mnist_data = {}
 
@@ -65,7 +67,11 @@ class ConvNet(nn.Module):
         return out
 
 
-def load_mnist_model(model: nn.Module, filename: str | None = None) -> None:
+def load_mnist_model(
+    model: nn.Module,
+    filename: str | None = None,
+    device: str | torch.device | None = None,
+) -> None:
     """
     Load MNIST model weights from a specified file into the provided model instance.
 
@@ -75,12 +81,17 @@ def load_mnist_model(model: nn.Module, filename: str | None = None) -> None:
         The PyTorch model instance into which the weights will be loaded.
     filename : str, optional
         The path to the file containing the model weights.
+    device : str, torch.device or None, optional
+        Device to run the evaluation on.
     """
+
+    if device is None:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     if filename is None:
         filename = os.path.join(os.getcwd(), "models", "mnist", "model.pt")
 
-    checkpoint = torch.load(filename)
+    checkpoint = torch.load(filename, map_location=device)
     model.load_state_dict(checkpoint["model_state_dict"])
 
 
@@ -95,17 +106,8 @@ async def init_vision_model() -> None:
     model.eval()
     load_mnist_model(model)
 
-    mnist_transform = transforms.Compose(
-        [
-            transforms.Resize((28, 28)),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5,), (0.5,)),
-        ]
-    )
-
     mnist_data["device"] = device
     mnist_data["model"] = model
-    mnist_data["transform"] = mnist_transform
 
 
 def predict(image: Image) -> tuple[int, list[float]]:
@@ -125,15 +127,16 @@ def predict(image: Image) -> tuple[int, list[float]]:
         The raw output logits for each digit class.
     """
 
+    alpha_np = np.array(image, dtype=np.float32) / 255.0
+
     image_tensor = (
-        mnist_data["transform"](image)
-        .unsqueeze(0)
-        .to(mnist_data["device"])[:, [3], :, :]
+        torch.tensor(alpha_np).unsqueeze(0).unsqueeze(0).to(mnist_data["device"])
     )
+    image_tensor = (image_tensor - 0.5) * 2
 
     with torch.no_grad():
         output = mnist_data["model"](image_tensor)[0]
-        output_list = output.to("cpu").tolist()
+        output_list = F.softmax(output, dim=0).to("cpu").tolist()
         predicted_class = torch.argmax(output).item()
 
     return predicted_class, output_list

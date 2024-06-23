@@ -80,6 +80,15 @@ span#predictionOutput {
     color: #1d4ed8;
 }
 
+canvas#distributionChart {
+    margin-top: 20px;
+    border: 2px solid #1d4ed8;
+    background-color: #ffffff;
+    width: 800px;
+    height: 400px;
+    transform: scale(1);
+}
+
 @media (max-width: 600px) {
     h1 {
         font-size: 2rem;

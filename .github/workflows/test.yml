@@ -3,14 +3,17 @@ name: test repository
 on:
   push:
     branches:
-      - "main"
-      - "dev"
-      - "test/*"
-      - "test-*"
+      - main
+      - dev
+      - test/*
+      - test-*
   pull_request:
     branches:
-      - "main"
-      - "dev"
+      - main
+      - dev
+
+permissions:
+  contents: read
 
 jobs:
   test:

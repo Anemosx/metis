@@ -44,9 +44,16 @@ async def predict_digit(data: ImageData) -> JSONResponse:
         image_bytes = base64.b64decode(data.image.split(",")[1])
         image = Image.open(io.BytesIO(image_bytes))
 
+        if image.mode != "RGBA":
+            image = image.convert("RGBA")
+
+        image = image.getchannel("A").resize((28, 28), Image.NEAREST)
+
         predicted_class, prediction_dist = predict(image)
 
-        return JSONResponse(content={"prediction": predicted_class})
+        return JSONResponse(
+            content={"prediction": predicted_class, "distribution": prediction_dist}
+        )
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
