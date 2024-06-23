@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "mnist"
+version = "0.0.1"
+description = ""
+authors = ["Arnold Unterauer <46269201+Anemosx@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+torch = {version = "^2.3.1", source="torch_cuda121"}
+torchvision = "^0.18.1"
+numpy = "<2"
+matplotlib = "^3.9.0"
+fastapi = "^0.111.0"
+pydantic = "^2.7.4"
+requests = "^2.32.3"
+tqdm = "^4.66.4"
+
+[[tool.poetry.source]]
+name = "torch_cuda121"
+url = "https://download.pytorch.org/whl/cu121"
+priority = "explicit"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

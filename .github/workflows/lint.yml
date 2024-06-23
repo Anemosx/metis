@@ -1,0 +1,23 @@
+name: black linting
+
+on:
+  push:
+    branches:
+      - "main"
+      - "dev"
+      - "test/*"
+      - "test-*"
+  pull_request:
+    branches:
+      - "main"
+      - "dev"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: psf/black@latest
+        with:
+          options: "--check --verbose"
+          src: "."
