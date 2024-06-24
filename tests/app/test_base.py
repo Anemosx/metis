@@ -7,7 +7,7 @@ class TestBase:
 
     @pytest.mark.asyncio
     def test_get_root(self, client: TestClient) -> None:
-        response = client.get(f"/mnist")
+        response = client.get(f"/")
 
         assert response.status_code == status.HTTP_200_OK
         assert response.headers["Content-Type"] == "text/html; charset=utf-8"

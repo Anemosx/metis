@@ -1,9 +1,10 @@
 import base64
 import io
+import os
 
 from PIL import Image
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
 from pydantic import BaseModel
 
 from app.vision.mnist import predict
@@ -22,6 +23,28 @@ class ImageData(BaseModel):
     """
 
     image: str
+
+
+mnist_html_file_path = os.path.join("static", "mnist", "index.html")
+with open(mnist_html_file_path, "r") as file:
+    mnist_content = file.read()
+
+
+@router.get("/mnist", response_class=HTMLResponse)
+async def read_mnist() -> HTMLResponse:
+    """
+    Serve the MNIST HTML page from the static directory.
+
+    Returns
+    -------
+    response : HTMLResponse
+        An HTML response containing the MNIST page content.
+    """
+
+    response = HTMLResponse(content=mnist_content)
+    response.headers["Cache-Control"] = "public, max-age=3600"
+
+    return response
 
 
 @router.post("/predict-mnist")
