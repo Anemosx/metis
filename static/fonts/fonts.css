@@ -1,0 +1,27 @@
+@font-face {
+    font-family: 'montserratregular';
+    src: url('msr.otf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'montserratsemibold';
+    src: url('mssb.otf') format('truetype');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'montserratextrabold';
+    src: url('mseb.otf') format('truetype');
+    font-weight: 800;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'quicksandregular';
+    src: url('quickr.otf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}

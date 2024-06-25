@@ -1,10 +1,7 @@
 body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #f0f2f5;
-    color: #333;
+    background-color: #1a1a25;
+    color: white;
     text-align: center;
-    margin: 0;
-    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -13,98 +10,103 @@ body {
 }
 
 .container {
+    font-family: 'montserratsemibold', sans-serif;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     width: 100%;
-    max-width: 800px;
-    padding: 20px;
     margin: 0 auto;
 }
 
 h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1.5rem;
-    color: #1d4ed8;
-    font-weight: 600;
+    font-family: 'montserratsemibold', sans-serif;
+    font-size: clamp(1rem, 2.5rem, 3rem);
+    color: white;
+    letter-spacing: 0.1875rem;
+    font-weight: 1000;
     line-height: 1.2;
 }
 
 canvas {
-    margin-bottom: 40px;
-    border: 2px dashed #1d4ed8;
-    background-color: #ffffff;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    backdrop-filter: blur(0.3125rem);
+    border-radius: 1.25rem;
+    overflow: hidden;
+    opacity: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     image-rendering: pixelated;
-    margin-top: 20px;
-    width: 300px;
-    height: 300px;
     cursor: crosshair;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0.625rem 1.25rem 1.125rem -0.5rem rgba(0, 0, 0, 0.5);
 }
 
 canvas:hover {
     transform: scale(1.2);
-    box-shadow: 0 4px 12px rgba(29, 78, 216, 0.2);
 }
 
 button {
-    margin-top: 20px;
-    padding: 12px 30px;
-    font-size: 1.1rem;
+    font-family: 'montserratsemibold', sans-serif;
+    margin-top: 1rem;
+    width: 10rem;
+    height: 4rem;
+    font-size: clamp(1rem, 1.2rem, 1.5rem);
+    font-weight: 600;
     cursor: pointer;
     border: none;
-    border-radius: 0.5rem;
-    background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+    border-radius: 0.9375rem;
+    background: rgba(100, 100, 100, 0.5);
+    backdrop-filter: blur(0.3125rem);
     color: #fff;
-    transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 6px 12px rgba(29, 78, 216, 0.3);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0.3125rem 0.3125rem 0.3125rem -0.125rem rgba(0, 0, 0, 0.5);
 }
 
 button:hover {
-    background: linear-gradient(135deg, #1e40af, #60a5fa);
+    background: rgba(255, 255, 255, 0.8);
+    color: rgba(0, 0, 0, 1.0);
     transform: scale(1.05);
-    box-shadow: 0 8px 16px rgba(29, 78, 216, 0.4);
 }
 
-p {
-    font-size: 1.2rem;
-    margin-top: 20px;
-    color: #555;
+predict {
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: clamp(1rem, 1.3rem, 1.5rem);
+    font-weight: 600;
+    color: #cccccc;
+    letter-spacing: 0.125rem;
     line-height: 1.6;
     max-width: 600px;
 }
 
 span#predictionOutput {
-    font-weight: bold;
-    color: #1d4ed8;
+    font-family: 'montserratsemibold', sans-serif;
+    font-size: clamp(1rem, 1.3rem, 1.5rem);
+    font-weight: 600;
+    color: white;
+}
+
+canvas#drawCanvas {
+    background-color: #ffffff;
+    width: 20rem;
+    height: auto;
+    min-width: 10rem;
+    min-height: 10rem;
+    max-width: 90vw;
+    aspect-ratio: 1;
 }
 
 canvas#distributionChart {
-    margin-top: 20px;
-    border: 2px solid #1d4ed8;
     background-color: #ffffff;
-    width: 800px;
-    height: 400px;
+    width: 50rem;
+    max-width: 90vw;
+    max-height: 45vw;
+    aspect-ratio: 2;
+    border-radius: 0.625rem;
     transform: scale(1);
-}
-
-@media (max-width: 600px) {
-    h1 {
-        font-size: 2rem;
-    }
-
-    canvas {
-        width: 80%;
-        height: auto;
-    }
-
-    button {
-        width: 80%;
-        font-size: 1.1rem;
-    }
-
-    p {
-        font-size: 1rem;
-    }
 }
