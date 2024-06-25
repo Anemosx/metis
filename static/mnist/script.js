@@ -119,9 +119,7 @@ function initializeChart() {
         datasets: [{
             label: 'Prediction Probability',
             data: Array(10).fill(0),
-            backgroundColor: 'rgba(29, 78, 216, 0.6)',
-            borderColor: 'rgba(29, 78, 216, 1)',
-            borderWidth: 1
+            backgroundColor: '#a4b6ef'
         }]
     };
 
@@ -131,13 +129,97 @@ function initializeChart() {
         options: {
             responsive: false,
             maintainAspectRatio: false,
+            drawBorder: false,
             scales: {
                 y: {
                     beginAtZero: true,
                     min: 0,
-                    max: 1
+                    max: 1,
+                    ticks: {
+                        callback: function(value) {
+                            if (value === 0 || value === 1) {
+                                return value;
+                            }
+                            return '';
+                        },
+                        color: '#fff',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    },
+                    grid: {
+                        display: false,
+                        borderDash: [3, 3],
+                        color: 'rgba(200, 200, 200, 0.8)',
+                        drawBorder: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Probability',
+                        color: '#fff',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: '#fff',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                    },
+                    title: {
+                        display: true,
+                        text: 'Digit',
+                        color: '#fff',
+                        font: {
+                            size: 16,
+                            weight: 'bold'
+                        }
+                    }
                 }
-            }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        usePointStyle: true,
+                        boxWidth: 0,
+                        filter: function(item, chart) {
+                            return item.text !== 'Prediction Probability';
+                        }
+                    }
+                }
+            },
+            onClick: (e) => {
+                const points = chartInstance.getElementsAtEventForMode(e, 'nearest', { intersect: true }, false);
+                if (points.length) {
+                    const firstPoint = points[0];
+                    const label = chartInstance.data.labels[firstPoint.index];
+                    if (label === 'Prediction Probability') {
+                        e.stopPropagation();
+                    }
+                }
+            },
+            layout: {
+                padding: {
+                    left: 20,
+                    right: 20,
+                    top: 20,
+                    bottom: 20
+                },
+            },
         }
     };
 

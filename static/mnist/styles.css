@@ -41,7 +41,7 @@ canvas {
     image-rendering: pixelated;
     cursor: crosshair;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 1);
     box-shadow: 0.625rem 1.25rem 1.125rem -0.5rem rgba(0, 0, 0, 0.5);
 }
 
@@ -102,7 +102,7 @@ canvas#drawCanvas {
 }
 
 canvas#distributionChart {
-    background-color: #ffffff;
+    background: rgba(100, 100, 100, 0.5);
     width: 50rem;
     max-width: 90vw;
     max-height: 45vw;
