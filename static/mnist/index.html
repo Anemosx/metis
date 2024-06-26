@@ -8,13 +8,15 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Draw Digit and Predict</h1>
-        <canvas id="drawCanvas"></canvas>
-        <button id="clearButton">Clear</button>
-        <button id="predictButton">Predict</button>
-        <predict>Prediction: <span id="predictionOutput">None</span></predict>
-        <canvas id="distributionChart"></canvas>
+    <div class="containerMNIST">
+        <h1 class="headingMNIST">Draw Digit and Predict</h1>
+        <canvas id="drawCanvas" class="canvasMNIST"></canvas>
+        <div class="predictMNIST">Prediction: <span id="predictionOutput" class="spanMNIST">None</span></div>
+        <div class="buttonContainerMNIST">
+            <button id="clearButton" class="buttonMNIST">Clear</button>
+            <button id="predictButton" class="buttonMNIST">Predict</button>
+        </div>
+        <canvas id="distributionChart" class="canvasMNIST"></canvas>
     </div>
     <script src="/static/mnist/script.js"></script>
 </body>
