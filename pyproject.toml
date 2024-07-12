@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "mnist"
+name = "metis"
 version = "0.0.1"
 description = ""
 authors = ["Arnold Unterauer <46269201+Anemosx@users.noreply.github.com>"]
