@@ -66,16 +66,16 @@ def compute_returns_advantages(last_value, rewards, dones, values, gamma: float 
         returns.insert(0, gae + value)
         advantages.insert(0, gae)
 
-    returns = torch.tensor(returns, dtype=torch.float32, device=device)
-    advantages = torch.tensor(advantages, dtype=torch.float32, device=device)
+    returns = torch.tensor(returns, device=device)
+    advantages = torch.tensor(advantages, device=device)
     advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
 
     return returns, advantages
 
 
 class PPOAgent:
-    def __init__(self, env: gym.Env, policy_lr: float = 4e-4, value_lr: float = 2e-3, opt_eps: float = 1e-5,
-                 clip_eps: float = 0.2, clip_grad: float = 0.5, update_epochs: int = 10, entropy_coef: float = 0.005, device: str | torch.device | None = "cpu"):
+    def __init__(self, env: gym.Env, policy_lr: float = 4e-4, value_lr: float = 2e-3, opt_eps: float = 1e-6,
+                 clip_eps: float = 0.2, clip_grad: float = 1, update_epochs: int = 10, entropy_coef: float = 0.001, device: str | torch.device | None = "cpu"):
         self.env = env
         self.state_dim = env.observation_space.shape[0]
         self.action_dim = env.action_space.n
@@ -100,10 +100,10 @@ class PPOAgent:
             log_prob = dist.log_prob(action)
         value = None
         if estimate_value:
-            value = self.value_net(state).item()
+            value = self.value_net(state)
         return action, log_prob, value
 
-    def update(self, states, actions, rewards, dones, values, old_log_probs):
+    def update(self, states: torch.Tensor, actions: torch.Tensor, rewards, dones, values, old_log_probs: torch.Tensor):
 
         last_value = self.value_net(states[-1])
 
@@ -133,14 +133,14 @@ class PPOAgent:
             self.value_optimizer.step()
 
 
-def train_model(env: Env, agent, memory, max_episodes: int = 1000, max_timesteps: int = 700, smooth_window: int = 20):
+def train_model(env: Env, agent, memory, max_episodes: int = 1000, max_steps: int = 700, smooth_window: int = 20):
     episode_rewards = []
     for episode in range(max_episodes):
         state = env.reset()[0]
         state = torch.tensor(state, device=agent.device)
         episode_reward = 0
 
-        for t in range(max_timesteps):
+        for t in range(max_steps):
             action, log_prob, value = agent.select_action(state)
             next_state, reward, done, _, _ = env.step(action.item())
             memory.push(state, action, log_prob, reward, done, value)
@@ -163,11 +163,11 @@ def train_model(env: Env, agent, memory, max_episodes: int = 1000, max_timesteps
     plt.show()
 
 
-def evaluate_model(env: Env, agent, num_episodes: int = 10, max_timesteps: int = 800):
+def evaluate_model(env: Env, agent, num_episodes: int = 10, max_steps: int = 800):
     for episode in range(num_episodes):
         state = env.reset()[0]
         episode_reward = 0
-        for t in range(max_timesteps):
+        for t in range(max_steps):
             env.render()
             action, _, _ = agent.select_action(state, estimate_value=False)
             state, reward, done, _, _ = env.step(action.item())
@@ -186,21 +186,21 @@ def run() -> None:
     gae_lambda = 0.95
 
     max_episodes = 1000
-    max_timesteps = 700
+    max_steps = 700
 
     eval_num_episodes = 10
-    eval_max_timesteps = 800
+    eval_max_steps = 800
 
-    train_env: Env = gym.make("LunarLander-v2", enable_wind=True)
+    train_env: Env = gym.make("LunarLander-v2", enable_wind=True, wind_power=5)
     eval_env: Env = gym.make("LunarLander-v2", render_mode="human")
 
     agent = PPOAgent(train_env, device=device)
 
     memory = ReplayMemory(gamma, gae_lambda, device=device)
 
-    train_model(train_env, agent, memory, max_episodes=max_episodes, max_timesteps=max_timesteps, smooth_window=20)
+    train_model(train_env, agent, memory, max_episodes=max_episodes, max_steps=max_steps, smooth_window=10)
 
-    evaluate_model(eval_env, agent, num_episodes=eval_num_episodes, max_timesteps=eval_max_timesteps)
+    evaluate_model(eval_env, agent, num_episodes=eval_num_episodes, max_steps=eval_max_steps)
 
 
 if __name__ == "__main__":
