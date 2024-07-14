@@ -29,8 +29,8 @@ class ReplayMemory:
     def __init__(self, gamma: float = 0.99, gae_lambda: float = 0.95, adjust_rewards: bool = True, device: str | torch.device | None = "cpu"):
         self.gamma = gamma
         self.gae_lambda = gae_lambda
-        self.device = device
         self.adjust_rewards = adjust_rewards
+        self.device = device
         self.memory = []
 
     def push(self, state, action, log_prob, reward, done, value):
@@ -39,38 +39,43 @@ class ReplayMemory:
 
         self.memory.append((state, action, log_prob, reward, done, value))
 
-    def create_batch(self):
+    def create_batch(self, last_value):
         states, actions, log_probs, rewards, dones, values = zip(*self.memory)
         old_log_probs = torch.cat(log_probs)
 
         states = torch.stack(states)
         actions = torch.stack(actions).unsqueeze(1)
 
+        returns, advantages = self.compute_returns_advantages(last_value, rewards, dones, values)
+
         self.memory = []
 
-        return states, actions, rewards, dones, values, old_log_probs
+        return states, actions, old_log_probs, returns, advantages
 
+    def compute_returns_advantages(self, last_value, rewards, dones, values):
 
-def compute_returns_advantages(last_value, rewards, dones, values, gamma: float = 0.99, gae_lambda: float = 0.95, device: str | torch.device | None = "cpu"):
-    returns = []
-    advantages = []
-    gae = 0
-    next_value = last_value
+        with torch.no_grad():
+            rewards = torch.tensor(rewards, device=self.device)
+            dones = torch.tensor(dones, device=self.device)
+            values = torch.tensor(values, device=self.device)
 
-    for reward, done, value in reversed(list(zip(rewards, dones, values))):
-        if done:
-            next_value = 0
-        delta = reward + gamma * next_value - value
-        gae = delta + gamma * gae_lambda * gae
-        next_value = value
-        returns.insert(0, gae + value)
-        advantages.insert(0, gae)
+            returns = torch.zeros(rewards.shape, device=self.device)
+            advantages = torch.zeros(rewards.shape, device=self.device)
 
-    returns = torch.tensor(returns, device=device)
-    advantages = torch.tensor(advantages, device=device)
-    advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+            gae = 0
+            next_value = last_value
+            for i in reversed(range(len(rewards))):
+                if dones[i]:
+                    next_value = 0
+                delta = rewards[i] + self.gamma * next_value - values[i]
+                gae = delta + self.gamma * self.gae_lambda * gae
+                next_value = values[i]
+                returns[i] = gae + values[i]
+                advantages[i] = gae
 
-    return returns, advantages
+            advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+
+        return returns, advantages
 
 
 class PPOAgent:
@@ -91,23 +96,22 @@ class PPOAgent:
         self.MseLoss = nn.MSELoss()
 
     def select_action(self, state: np.ndarray | torch.Tensor, estimate_value: bool = True) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor | None]:
-        if not isinstance(state, torch.Tensor):
-            state = torch.tensor(state, device=self.device)
         with torch.no_grad():
+            if not isinstance(state, torch.Tensor):
+                state = torch.tensor(state, device=self.device)
+
             logits = self.policy_net(state.unsqueeze(0))
             dist = Categorical(logits=logits)
             action = dist.sample()
             log_prob = dist.log_prob(action)
-        value = None
-        if estimate_value:
-            value = self.value_net(state)
+
+            value = None
+            if estimate_value:
+                value = self.value_net(state)
+
         return action, log_prob, value
 
-    def update(self, states: torch.Tensor, actions: torch.Tensor, rewards, dones, values, old_log_probs: torch.Tensor):
-
-        last_value = self.value_net(states[-1])
-
-        returns, advantages = compute_returns_advantages(last_value, rewards, dones, values, gamma=0.99, gae_lambda=0.95, device=self.device)
+    def update(self, states: torch.Tensor, actions: torch.Tensor, old_log_probs: torch.Tensor, returns: torch.Tensor, advantages: torch.Tensor) -> None:
 
         for _ in range(self.update_epochs):
             logits = self.policy_net(states)
@@ -151,7 +155,7 @@ def train_model(env: Env, agent, memory, max_episodes: int = 1000, max_steps: in
             if done:
                 break
 
-        agent.update(*memory.create_batch())
+        agent.update(*memory.create_batch(agent.value_net(state)))
         episode_rewards.append(episode_reward)
         print(f'Episode {episode + 1}/{max_episodes}, Reward: {episode_reward}')
 
