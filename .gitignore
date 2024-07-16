@@ -162,4 +162,3 @@ cython_debug/
 .idea/
 
 src/mnist/data/MNIST
-src/mnist/models/*
