@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-torch = {version = "^2.3.1", source="torch_cuda121"}
+torch = {version = "^2.3.1"}
 torchvision = "^0.18.1"
 numpy = "<2"
 matplotlib = "^3.9.0"
@@ -17,6 +17,8 @@ requests = "^2.32.3"
 tqdm = "^4.66.4"
 black = "^24.4.2"
 gymnasium = {extras = ["box2d"], version = "^0.29.1"}
+scikit-learn = "^1.5.1"
+seaborn = "^0.13.2"
 
 [[tool.poetry.source]]
 name = "torch_cuda121"
