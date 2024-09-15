@@ -112,8 +112,13 @@ def sample_time(batch_size: int) -> torch.Tensor:
     return torch.rand(batch_size, 1, 1, 1)
 
 
-def train(model: nn.Module, train_loader: DataLoader, optimizer: optim.Optimizer,
-          epochs: int, device: torch.device) -> None:
+def train(
+    model: nn.Module,
+    train_loader: DataLoader,
+    optimizer: optim.Optimizer,
+    epochs: int,
+    device: torch.device,
+) -> None:
     """
     Trains the diffusion model on a given dataset.
 
@@ -155,8 +160,12 @@ def train(model: nn.Module, train_loader: DataLoader, optimizer: optim.Optimizer
             progress_bar.set_description(f"Epoch {epoch + 1} Loss {loss.item():.4f}")
 
 
-def evaluate_model(model: nn.Module, test_loader: DataLoader, device: torch.device,
-                   num_images: int = 10) -> None:
+def evaluate_model(
+    model: nn.Module,
+    test_loader: DataLoader,
+    device: torch.device,
+    num_images: int = 10,
+) -> None:
     """
     Evaluates the model on a test dataset and visualizes the results.
 
@@ -208,7 +217,7 @@ def evaluate_model(model: nn.Module, test_loader: DataLoader, device: torch.devi
                 # denoised image
                 ax = plt.subplot(3, num_images, 2 * num_images + images_shown + 1)
                 denoised_img = (
-                        denoised_images[i].cpu().permute(1, 2, 0).numpy() * 0.5 + 0.5
+                    denoised_images[i].cpu().permute(1, 2, 0).numpy() * 0.5 + 0.5
                 )
                 ax.imshow(np.clip(denoised_img, 0, 1))
                 ax.axis("off")
